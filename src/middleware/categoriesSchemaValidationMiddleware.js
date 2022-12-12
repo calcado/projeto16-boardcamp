@@ -3,7 +3,7 @@ import { categoriesSchema } from "../models/categoriesSchema.js";
 
 export async function categoriesSchemaValidation(req, res, next) {
   const { name } = req.body;
-   const { error } = categoriesSchema.validate(req.body, {
+  const { error } = categoriesSchema.validate(req.body, {
     abortEarly: false,
   });
 

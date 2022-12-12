@@ -50,7 +50,17 @@ export async function postCustomers(req, res) {
 }
 
 export async function putCustomers(req, res) {
+  const {name, phone, cpf, birthday} = res.locals.customer 
+  const {id} = req.params
   try {
+    await connection.query(`
+    UPDATE customers 
+    SET name=${name}
+    phone = ${phone} 
+    cpf = ${cpf} 
+    birthday = ${birthday}
+    WHERE id = ${id}`)
+    res.sendStatus(200)
   } catch (err) {
     console.log(err);
   }
