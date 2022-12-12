@@ -1,8 +1,9 @@
 import {Router} from "express";
-
+import { getGames,postGames } from "../controllers/gamesController";
+import { gamesSchemaValidation } from "../middleware/gamesSchemaValidationMiddleware.js";
 const gamesRouter = Router();
 
 gamesRouter.get("/games", getGames);
-gamesRouter.post("/games", postGames);
+gamesRouter.post("/games",gamesSchemaValidation, postGames);
 
 export default gamesRouter;

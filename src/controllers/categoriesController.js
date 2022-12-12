@@ -1,6 +1,7 @@
 import {connection} from "../database/db.js";
 
 export async function getCategories(req,res){
+
 try{
   const {rows} = await connection.query("SELECT * FROM categories;");
   res.send(rows);  
@@ -9,12 +10,12 @@ try{
     
 }
 
-export async function postCategorioes(req,res){
-const {name} = req.body
+export async function postCategories(req,res){
+const {name} = res.locals.name
 
 try{
 await connection.query("INSERT INTO categories (name) VALUES ($1);",[name]);
+res.send(201)
 }catch(err){
     console.log(err)}
-
 }

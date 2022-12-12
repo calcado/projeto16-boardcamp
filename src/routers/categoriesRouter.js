@@ -1,8 +1,10 @@
 import {Router} from "express";
+import { getCategories,postCategories } from "../controllers/categoriesController.js";
+import { categoriesSchemaValidation } from "../middleware/categoriesSchemaValidationMiddleware.js";
 
-const categoryRouter = Router();
+const categoriesRouter = Router();
 
-categoryRouter.get("/categories", getCategories);
-categoryRouter.post("/categories", postCaregories);
+categoriesRouter.get("/categories", getCategories);
+categoriesRouter.post("/categories", categoriesSchemaValidation, postCategories);
 
-export default categoryRouter;
+export default categoriesRouter;
