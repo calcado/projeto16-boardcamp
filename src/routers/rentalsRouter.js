@@ -1,4 +1,6 @@
 import {Router} from "express";
+import {getRentals,postRentals, postReturnRentals, deleteRentals} from "../controllers/rentalsController.js"
+
 
 const rentalsRouter = Router();
 
