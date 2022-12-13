@@ -4,15 +4,15 @@ export async function getCustomers(req, res) {
   const { cpf } = req.query;
   try {
     if (cpf) {
-      const customers = await connection.query(
+      const {rows} = await connection.query(
         `
         SELECT * FROM customers WHERE cpf ILIKE $1 || '%';`,
         [cpf]
       );
-      res.send(customers);
+      res.send(rows);
     } else {
-      const allCustomers = await connection.query(`SELECT * FROM customers;`);
-      res.send(allCustomers);
+      const {rows} = await connection.query(`SELECT * FROM customers;`);
+      res.send(rows);
     }
   } catch (err) {
     console.log(err);

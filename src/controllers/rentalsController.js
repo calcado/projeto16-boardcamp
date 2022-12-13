@@ -5,15 +5,15 @@ export async function getRentals(req,res){
 const customerId = req.query
 const gameId = req.query
 
+try{
 if (customerId) {
-const rentalsCustomer = await connection.query(`SELECT rentals.*, customers.name AS "customersName",
-games.name AS "gamesName" , games."categoryId", games."categoryName", categories.id AS "categoriesId", categories.name AS "categoriesName"
- FROM rentals 
- JOIN customers ON customers.id="customersId" 
- JOIN games ON games.id="gamesId", 
- JOIN categories ON categories.id="categoriesId" WHERE customer.id=$1;`,[customerId])
+  
+const rentalsCustomer = await connection.query(`SELECT rentals.*, customers.name AS customer, games.name AS game, categories.id AS "categoryId", categories.name AS "categoryName" FROM rentals 
+JOIN customers ON customers.id = "customerId" 
+JOIN games ON games.id = "gameId" 
+JOIN categories ON categories.id = games."categoryId" WHERE customer.id=$1;`,[customerId])
 
-const results = rentalsCustomer.map((result)=>  {
+const results = rentalsCustomer.rows.map((result)=>  {
   return {
     id:result.id,
     customerId: result.customerId,
@@ -33,19 +33,18 @@ const results = rentalsCustomer.map((result)=>  {
       categoryId:result.categoriesId,
       categoryName:result.categoriesName,
     },
-  }});
+  }})
 
 res.send(results)
 
 }else if(gameId){
-const rentalsGame = await connection.query(`SELECT rentals.*, customers.name AS "customersName",
-games.name AS "gamesName" , games."categoryId", games."categoryName", categories.id AS "categoriesId", categories.name AS "categoriesName"
- FROM rentals 
- JOIN customers ON customers.id="customersId" 
- JOIN games ON games.id="gamesId", 
- JOIN categories ON categories.id="categoriesId" WHERE game.id=$1;`,[gameId])
 
-const results = rentalsGame.map((result)=>  {
+const rentalsGame = await connection.query(`SELECT rentals.*, customers.name AS customer, games.name AS game, categories.id AS "categoryId", categories.name AS "categoryName" FROM rentals 
+JOIN customers ON customers.id = "customerId" 
+JOIN games ON games.id = "gameId" 
+JOIN categories ON categories.id = games."categoryId"WHERE game.id=$1;`,[gameId])
+
+const results = rentalsGame.rows.map((result)=>  {
   return {
     id:result.id,
     customerId: result.customerId,
@@ -65,19 +64,26 @@ const results = rentalsGame.map((result)=>  {
       categoryId:result.categoriesId,
       categoryName:result.categoriesName,
     },
-  }});
+  }})
 
 res.send(results)
 }else{
-try {
-    const allRent = await connection.query(`SELECT rentals.*, customers.name AS "customersName",
-    games.name AS "gamesName" , games."categoryId", games."categoryName", categories.id AS "categoriesId", categories.name AS "categoriesName"
-     FROM rentals 
-     JOIN customers ON customers.id="customersId" 
-     JOIN games ON games.id="gamesId", 
-     JOIN categories ON categories.id="categoriesId";`);
 
-    const results = allRent.map((result)=>  {
+  `SELECT rentals.*, customers.name AS "customersName",
+  games.name AS "gamesName" , categories.id AS "categoryId", categories.name AS "categoryName"
+   FROM rentals 
+   JOIN customers ON customers.id="customersId" 
+   JOIN games ON games.id="gamesId" 
+   JOIN categories ON categories.id = games."categoryId";`
+
+
+  console.log("entrou")
+    const allRent = await connection.query(`SELECT rentals.*, customers.name AS customer, games.name AS game, categories.id AS "categoryId", categories.name AS "categoryName" FROM rentals 
+    JOIN customers ON customers.id = "customerId" 
+    JOIN games ON games.id = "gameId" 
+    JOIN categories ON categories.id = games."categoryId"`);
+console.log("passou")
+    const results = allRent.rows.map((result)=>  {
       return {
         id:result.id,
         customerId: result.customerId,
@@ -98,31 +104,33 @@ try {
           categoryName:result.categoriesName,
         },
       }});
-
+console.log("saiu")
     res.send(results)
-  } catch (err) {
-    console.log(err);
-  }
-}
+  }}
+  catch(err){console.log(err)}
+
 }
 export async function postRentals(req,res){
 const {customerId,gameId,daysRented} = res.locals.rental
-
+console.log(res.locals.rental)
 const rentDate = dayjs().format("YYYY-MM-DD");
-const returnDate = null
-const delayFee = null
 
 const game = await connection.query(`SELECT * FROM games WHERE id = ${gameId};`)
-const pricePerDay = game.pricePerDay
+const pricePerDay = game.rows[0].pricePerDay
+console.log(pricePerDay,daysRented)
 const originalPrice = pricePerDay*daysRented;
 
 try{
+console.log(customerId,gameId,rentDate,daysRented,null,originalPrice,null)
+console.log("oi")
 await connection.query(`
 INSERT INTO rentals
-("customerId","gameId","rentDate",daysRented","returnDate","originalPrice","delayFee") 
+("customerId","gameId","rentDate","daysRented","returnDate","originalPrice","delayFee") 
 VALUES ($1,$2,$3,$4,$5,$6,$7);`, 
-[customerId,gameId,rentDate,daysRented,returnDate,originalPrice,delayFee])
+[customerId,gameId,rentDate,daysRented,null,originalPrice,null])
+
 res.sendStatus(201)
+
 }catch(err){
   console.log(err)}
 }
@@ -131,12 +139,13 @@ export async function postReturnRentals(req,res){
 const {id} = req.params
 const deliverDate = dayjs().format("YYYY-MM-DD");
 const delayFee = null
+console.log(id)
 if(!id){
   return res.send(404)
 }
 
 try{
-  const rent = await connection.query(`SELECT * FROM rentals WHERE id=${id}`)
+  const rent = await connection.query(`SELECT * FROM rentals WHERE id=$1`,[id])
   const maxDate = new Date(rent.rentDate)
   const returnDate = new Date(deliverDate)
   
