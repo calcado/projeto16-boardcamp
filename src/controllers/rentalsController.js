@@ -140,6 +140,7 @@ const {id} = req.params
 const deliverDate = dayjs().format("YYYY-MM-DD");
 const delayFee = null
 console.log(id)
+
 if(!id){
   return res.send(404)
 }
@@ -150,7 +151,7 @@ try{
   const returnDate = new Date(deliverDate)
   
   
-  if(deliverDate.isAfter(maxDate)){
+  if(dayjs(deliverDate).isAfter(maxDate)){
     const difference  = Math.abs(returnDate - maxDate);
     const minutes = 1000*60*60*24;
     const daysDelay = difference/minutes
@@ -163,7 +164,7 @@ try{
 
  
 
-await connection.query(`UPDATE rentals (returnDate, delayFee) VALUES ($1,$2) WHERE id=${id};`, [returnDate, delayFee])
+await connection.query(`UPDATE rentals SET "returnDate"=$1, "delayFee"=$2  WHERE id=$3;`, [returnDate, delayFee,id])
  res.sendStatus(200) 
 }catch(err){console.log(err)}
 } 
@@ -181,7 +182,7 @@ export async function deleteRentals(req,res){
   }catch(err){console.log(err)}
   
   try{
-    await connection.query(`DELETE * FROM rentals WHERE id = $1;`,[id])
+    await connection.query(`DELETE FROM rentals WHERE id = $1;`,[id])
     res.send(200)
   }catch(err){
     console.log(err)}
