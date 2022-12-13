@@ -10,7 +10,8 @@ export async function getGames(req, res) {
         FROM games 
         JOIN categories 
         ON "categoryId"=categories.id 
-        WHERE games.name ILIKE $1 || '%' ;`,[name]
+        WHERE games.name ILIKE $1 || '%' ;`,
+        [name]
       );
       return res.send(games);
     } else {
@@ -19,7 +20,8 @@ export async function getGames(req, res) {
         categories.name AS "categoryName" 
         FROM games 
         JOIN categories 
-        ON "categoryId"=categories.id ;`, [name]
+        ON "categoryId"=categories.id ;`,
+        [name]
       );
       return res.send(allGames);
     }
